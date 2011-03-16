@@ -38,23 +38,23 @@ function emogrifier_filter_info() {
     'filter_emogrifier' => array(
       'title' => t('Emogrifier'),
       'description' => t('Converts stylesheet rules to inline style attributes.'),
-      'process callback' => '_filter_emogrifier',
+      'process callback' => '_filter_emogrifier_process',
       'tips callback' => '_filter_emogrifier_tips',
     ),
   );
 }
 
 /**
- * Returns text for the 'tips callback' of hook_filter_info().
+ * Implements hook_filter_FILTER_tips().
  */
 function _filter_emogrifier_tips($format, $long = FALSE) {
   return t('Stylesheet rules will be converted to inline style attributes.');
 }
 
 /**
- * Filters text for the 'process callback' of hook_filter_info().
+ * Implements hook_filter_FILTER_process().
  */
-function _filter_emogrifier($text, $format) {
+function _filter_emogrifier_process($text, $format) {
   if (empty($text)) {
     return '';
   }
