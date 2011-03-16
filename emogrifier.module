@@ -45,16 +45,10 @@ function emogrifier_filter_info() {
 }
 
 /**
- * Implements hook_filter_FILTER_tips().
- */
-function _filter_emogrifier_tips($format, $long = FALSE) {
-  return t('Stylesheet rules will be converted to inline style attributes.');
-}
-
-/**
  * Implements hook_filter_FILTER_process().
+ @see emogrifier_filter_info()
  */
-function _filter_emogrifier_process($text, $format) {
+function _filter_emogrifier_process($text, $filter, $format, $langcode, $cache, $cache_id) {
   if (empty($text)) {
     return '';
   }
@@ -136,4 +130,12 @@ function _emogrifier_available() {
   }
   include_once libraries_get_path('emogrifier') . '/emogrifier.php';
   return class_exists('Emogrifier');
+}
+
+/**
+ * Implements hook_filter_FILTER_tips().
+ @see emogrifier_filter_info()
+ */
+function _filter_emogrifier_tips($filter, $format, $long) {
+  return t('Stylesheet rules will be converted to inline style attributes.');
 }
