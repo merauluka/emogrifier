@@ -83,23 +83,37 @@ function _filter_emogrifier_process($text, $filter, $format, $langcode, $cache, 
     return $text;
   }
   $style = array();
+  $urls = array();
   // Fetch the contents of Drupal-generated linked stylesheets with media="all".
-  $link_re = "@<link type=\"text/css\" rel=\"stylesheet\" href=\"(.*)\" media=\"all\" />@Usi";
-  if (preg_match_all($link_re, $text, $matches)) {
-    foreach ($matches[1] as $url) {
-      $response = drupal_http_request($url);
-      if (empty($response->error)) {
-        $style[] = $response->data;
+  if (preg_match_all(
+      '#<link\s*type\s*=\s*(["\'])text/css\1\s+rel\s*=\s*(["\'])stylesheet\2\s+href\s*=\s*(["\'])(.*)\3\s+media\s*=\s*(["\']?)all\5\s*/>#Usi',
+      $text, $match)) {
+    $urls = array_merge($urls, $match[4]);
+    $text = str_replace($match[0], '', $text);
+  }
+  if (preg_match_all(
+      '#<style\s+type\s*=\s*(["\'])text/css\1\s+media\s*=\s*(["\'])all\2\s*>(.*)</style>#Usi',
+      $text, $match)) {
+    foreach ($match[3] as $imports) {
+      if (preg_match_all(
+          '#@import\s+url\s*\(\s*(["\'])(.*)\1\s*\)\s*;#',
+          $imports, $import)) {
+        $urls = array_merge($urls, $import[2]);
       }
     }
-    // Remove the matched stylesheet links.
-    $text = str_replace($matches[0], '', $text);
+    $text = str_replace($match[0], '', $text);
   }
-  // Extract the contents of any inline stylesheet rules.
-  $style_re = '@<style[^>]*>\s*?(<!--)??\s*?(.*)\s*?(-->)??\s*?</style>@Usi';
-  if (preg_match_all($style_re, $text, $matches)) {
+  foreach ($urls as $url) {
+    if ( ($path = drupal_realpath(DRUPAL_ROOT . parse_url($url, PHP_URL_PATH)))
+      && (is_readable($path) && !is_dir($path)) ) {
+      $style[] = file_get_contents($path);
+    }
+  }
+  // Extract the contents of any remaining inline stylesheet rules.
+  if (preg_match_all(
+      '#<style[^>]*>\s*(<!--)?\s*?(.*?)\s*(-->)?\s*</style>#si',
+      $text, $matches)) {
     $style = array_merge($style, $matches[2]);
-    // Remove the matched stylesheet rules.
     $text = str_replace($matches[0], '', $text);
   }
   // Strip comments and unecessary whitespace from the collected style rules.
@@ -114,6 +128,24 @@ function _filter_emogrifier_process($text, $filter, $format, $langcode, $cache, 
   // Apply the rules to create inline style attributes.
   $text = $emogrifier->emogrify();
   error_reporting($errorlevel);
+  // Strip class and role attributes, strip html comments,
+  // and replace <header> with <div>.
+  $text = preg_replace(
+    array(
+      '#(<[^>]*?)\s*class\s*=\s*(["\']).*?\2(\s*[^>])?#si',
+      '#(<[^>]*?)\s*role\s*=\s*(["\']).*?\2(\s*[^>])?#si',
+      '#\s*<!--.*?-->\s*#si',
+      '#(<(/?))header#si',
+    ),
+    array(
+      '\1\4',
+      '\1\4',
+      '',
+      '\1div'
+    ),
+    $text
+  );
+  // @todo Strip any whitespace outside of <pre> or <code> tags?
   return $text;
 }
 
