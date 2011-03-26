@@ -91,6 +91,7 @@ function _filter_emogrifier_process($text, $filter, $format, $langcode, $cache, 
     $urls = array_merge($urls, $match[4]);
     $text = str_replace($match[0], '', $text);
   }
+  // This match is for non-aggregated stylesheets.
   if (preg_match_all(
       '#<style\s+type\s*=\s*(["\'])text/css\1\s+media\s*=\s*(["\'])all\2\s*>(.*)</style>#Usi',
       $text, $match)) {
@@ -117,36 +118,147 @@ function _filter_emogrifier_process($text, $filter, $format, $langcode, $cache, 
     $text = str_replace($matches[0], '', $text);
   }
   // Strip comments and unecessary whitespace from the collected style rules.
-  $style = preg_replace(array("/[[:space:]]+/", '#/\*.*?\*/#', '/ +/'), ' ', $style);
-  // Emogrify can't handle several CSS rules on one line, so insert a newline
-  // character after each closing bracket.
+  $style = preg_replace(
+    array('/[[:space:]]+/s', '#/\*.*?\*/#', '/ +/'), ' ', $style
+  );
+  // Emogrify can't handle several CSS rules on one line,
+  // so insert a newline character after each closing bracket.
   $style = preg_replace('/}\s*/', "}\n", implode("\n", $style));
-  // Get and reset error levels to avoid DOMDocument::loadHTML() errors.
-  $errorlevel = error_reporting(0);
+  // Replace unknown tags.
+  $text = preg_replace_callback(
+    '#\s*(<(/?))([![:alnum:]]+)([^>]*>)#s', '_emogrifier_replace_tag', $text
+  );
+  // Strip unwanted container tags replaced by comments.
+  $text = preg_replace('#\s*<!--.*?-->\s*#si', '', $text);
   // Load the html text and style rules.
   $emogrifier = new Emogrifier($text, $style);
   // Apply the rules to create inline style attributes.
   $text = $emogrifier->emogrify();
-  error_reporting($errorlevel);
-  // Strip class and role attributes, strip html comments,
-  // and replace <header> with <div>.
+  // Strip unwanted attributes.
   $text = preg_replace(
     array(
-      '#(<[^>]*?)\s*class\s*=\s*(["\']).*?\2(\s*[^>])?#si',
-      '#(<[^>]*?)\s*role\s*=\s*(["\']).*?\2(\s*[^>])?#si',
-      '#\s*<!--.*?-->\s*#si',
-      '#(<(/?))header#si',
-    ),
-    array(
-      '\1\4',
-      '\1\4',
-      '',
-      '\1div'
-    ),
-    $text
-  );
+      '#(<[^>]*?)\s*accept-charset\s*=\s*(["\']).*?\2#si',
+      '#(<[^>]*?)\s*accept\s*=\s*(["\']).*?\2#si',
+      '#(<[^>]*?)\s*accesskey\s*=\s*(["\']).*?\2#si',
+      '#(<[^>]*?)\s*action\s*=\s*(["\']).*?\2#si',
+      '#(<[^>]*?)\s*cite\s*=\s*(["\']).*?\2#si',
+      '#(<[^>]*?)\s*class\s*=\s*(["\']).*?\2#si',
+      '#(<[^>]*?)\s*compact\s*=\s*(["\']).*?\2#si',
+      '#(<[^>]*?)\s*datetime\s*=\s*(["\']).*?\2#si',
+      '#(<[^>]*?)\s*enctype\s*=\s*(["\']).*?\2#si',
+      '#(<[^>]*?)\s*for\s*=\s*(["\']).*?\2#si',
+      '#(<[^>]*?)\s*id\s*=\s*(["\']).*?\2#si',
+      '#(<[^>]*?)\s*ismap\s*=\s*(["\']).*?\2#si',
+      '#(<[^>]*?)\s*longdesc\s*=\s*(["\']).*?\2#si',
+      '#(<[^>]*?)\s*maxlength\s*=\s*(["\']).*?\2#si',
+      '#(<[^>]*?)\s*media\s*=\s*(["\']).*?\2#si',
+      '#(<[^>]*?)\s*method\s*=\s*(["\']).*?\2#si',
+      '#(<[^>]*?)\s*onblur\s*=\s*(["\']).*?\2#si',
+      '#(<[^>]*?)\s*onclick\s*=\s*(["\']).*?\2#si',
+      '#(<[^>]*?)\s*ondblclick\s*=\s*(["\']).*?\2#si',
+      '#(<[^>]*?)\s*onfocus\s*=\s*(["\']).*?\2#si',
+      '#(<[^>]*?)\s*onkeydown\s*=\s*(["\']).*?\2#si',
+      '#(<[^>]*?)\s*onkeypress\s*=\s*(["\']).*?\2#si',
+      '#(<[^>]*?)\s*onkeyup\s*=\s*(["\']).*?\2#si',
+      '#(<[^>]*?)\s*onmousedown\s*=\s*(["\']).*?\2#si',
+      '#(<[^>]*?)\s*onmousemove\s*=\s*(["\']).*?\2#si',
+      '#(<[^>]*?)\s*onmouseout\s*=\s*(["\']).*?\2#si',
+      '#(<[^>]*?)\s*onmouseover\s*=\s*(["\']).*?\2#si',
+      '#(<[^>]*?)\s*onmouseup\s*=\s*(["\']).*?\2#si',
+      '#(<[^>]*?)\s*rel\s*=\s*(["\']).*?\2#si',
+      '#(<[^>]*?)\s*rev\s*=\s*(["\']).*?\2#si',
+      '#(<[^>]*?)\s*role\s*=\s*(["\']).*?\2#si',
+      '#(<[^>]*?)\s*target\s*=\s*(["\']).*?\2#si',
+    ),'\1', $text);
   // @todo Strip any whitespace outside of <pre> or <code> tags?
   return $text;
+}
+
+function _emogrifier_replace_tag(array $matches){
+  static $allowed;
+  if (!isset($allowed)) {
+    $allowed = &emogrifier_allowed_tags();
+  }
+  $repl = isset( $allowed[ $name = strtolower($matches[3]) ] )
+    ? ( is_array($tag = $allowed[$name])
+      ? $tag[ (bool)$matches[2] ] // Allowed start/end tag replacements.
+      : ( $matches[1] . $tag . $matches[4] ) // Both tag replacements.
+    ) : '' ; // All unlisted tags are removed, but their contents remain.
+  if ($repl != $matches[0]) {
+    error_log(preg_replace('/[[:space:]]+/s',' ',var_export($matches[0],1) . ' >>> ' . var_export($repl,1)));
+  }
+  return $repl;
+}
+
+function &emogrifier_allowed_tags() {
+  $tags = drupal_static(__FUNCTION__);
+  if (!isset($tags)) {
+    $tags = variable_get(
+      'emogrifier_allowed_tags',
+      array_combine(
+        // Safe tags allowed in both HTML4 and XHTML are unchanged.
+        $a = explode(
+          ',', 'a,abbr,address,area,b,bdo,blockquote,br,button,caption,cite,'
+          . 'code,col,colgroup,dd,del,dfn,div,dl,dt,em,fieldset,font,form,h1,h2,'
+          . 'h3,h4,h5,h6,hr,i,img,input,ins,kbd,label,legend,li,map,ol,optgroup,'
+          . 'option,p,pre,q,s,samp,select,span,strike,strong,sub,sup,table,'
+          . 'tbody,td,textarea,tfoot,th,thead,tr,tt,u,ul,var,'
+        ), $a
+      ) + array_fill_keys(
+        // Deprecated/unsupported inline tags replaced by 'span'.
+        explode(',', 'acronym,meter,output,progress,time'), 'span'
+      ) + array_fill_keys(
+        // Deprecated/unsupported container tags replaced by 'div'.
+        explode(
+          ',', 'article,aside,body,details,figcaption,figure,footer,header,'
+          . 'hgroup,nav,section,summary'
+        ), 'div'
+      ) + array_fill_keys(
+        // Container tags to be removed along with their contents.
+        explode(
+          ',', 'applet,audio,canvas,embed,frameset,iframe,object,ruby,'
+          . 'script,style,title,video'
+        ), array('<!--', '-->')
+      ) + array_fill_keys(
+        // Subparts to be retained inside otherwise excluded containers.
+        explode(',', 'noframes,noscript,rp'),
+        array('-->', '<!--')
+      ) + array(
+        // Other tag replacements.
+        'b' => 'strong',
+        'big' => array(
+          '<span style="font-size: 120%">', '</span>'
+        ),
+        'center' => array(
+          '<div style="text-align: center">', '</div>'
+        ),
+        'command' => 'button',
+        'datalist' => 'select',
+        'dir' => 'ul',
+        'i' => 'em',
+        'mark' => array(
+          '<span style="background-color: yellow; color: black">', '</span>'
+        ),
+        'menu' => 'ul',
+        's' => array(
+          '<span style="text-decoration: line-through">', '</span>'
+        ),
+        'small' => array(
+          '<span style="font-size: 80%">', '</span>'
+        ),
+        'strike' => array(
+          '<span style="text-decoration: line-through">', '</span>'
+        ),
+        'u' => array(
+          '<span style="text-decoration: underline">', '</span>'
+        ),
+        'wbr' => array('&shy;', ''),
+        'xmp' => 'pre',
+        )
+      // All other tags are removed, while their content remains.
+    );
+  }
+  return $tags;
 }
 
 /**
