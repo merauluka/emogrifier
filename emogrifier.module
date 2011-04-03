@@ -138,7 +138,7 @@ function _filter_emogrifier_process($text, $filter, $format, $langcode, $cache, 
   // Load the html text and style rules.
   $emogrifier = new Emogrifier('<html><body>' . $text . '</body></html>', $style);
   // Apply the rules to create inline style attributes.
-  $text = $emogrifier->emogrify();
+  $text = @$emogrifier->emogrify();
   // Strip unwanted attributes.
   $text = preg_replace(
     array(
