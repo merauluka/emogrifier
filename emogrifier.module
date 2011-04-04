@@ -38,7 +38,7 @@ function emogrifier_filter_info() {
     'filter_emogrifier' => array(
       'title' => t('Emogrifier'),
       'description' => t('Converts stylesheet rules to inline style attributes.'),
-      'process callback' => '_filter_emogrifier_process',
+      'process callback' => 'emogrifier_process',
       'tips callback' => '_filter_emogrifier_tips',
     ),
   );
@@ -48,7 +48,7 @@ function emogrifier_filter_info() {
  * Implements hook_filter_FILTER_process().
  @see emogrifier_filter_info()
  */
-function _filter_emogrifier_process($text, $filter, $format, $langcode, $cache, $cache_id) {
+function emogrifier_process($text, $filter, $format, $langcode, $cache, $cache_id) {
   if (empty($text)) {
     return '';
   }
@@ -233,7 +233,7 @@ function _emogrifier_available() {
   if (!file_exists($path)) {
     return FALSE;
   }
-  include_once libraries_get_path('emogrifier') . '/emogrifier.php';
+  include_once $path;
   return class_exists('Emogrifier');
 }
 
@@ -241,6 +241,6 @@ function _emogrifier_available() {
  * Implements hook_filter_FILTER_tips().
  @see emogrifier_filter_info()
  */
-function _filter_emogrifier_tips($filter, $format, $long) {
+function emogrifier_filter_tips($filter, $format, $long) {
   return t('Stylesheet rules will be converted to inline style attributes.');
 }
