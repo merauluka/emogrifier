@@ -3,4 +3,4 @@ description = Converts stylesheets to inline style rules for better compatibilit
 package = Input filters
 core = 7.x
 dependencies[] = libraries
-files[] = emogrifier.module
+
