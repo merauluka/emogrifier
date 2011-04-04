@@ -31,7 +31,7 @@ support.
 5.  [Install](http://drupal.org/node/895232)
     [this module](http://drupal.org/project/emogrifier) and enable it.
 
-6.  Visit admin/configure/content/formats or click on
+6.  Visit <u>admin/configure/content/formats</u> or click on
 
     >    Administer >> Configuration >> Content authoring >> Text formats
 
