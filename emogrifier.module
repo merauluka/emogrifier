@@ -39,7 +39,8 @@ function emogrifier_filter_info() {
       'title' => t('Emogrifier'),
       'description' => t('Converts stylesheet rules to inline style attributes.'),
       'process callback' => 'emogrifier_process',
-      'tips callback' => '_filter_emogrifier_tips',
+      'settings callback' => 'emogrifier_filter_settings',
+      'tips callback' => 'emogrifier_filter_tips',
     ),
   );
 }
@@ -238,8 +239,16 @@ function _emogrifier_available() {
 }
 
 /**
+ * Implements hook_filter_FILTER_settings().
+ * @see emogrifier_filter_info()
+ */
+function emogrifier_filter_settings($form, &$form_state, $filter, $format, $defaults, $filters) {
+  return array();
+}
+
+/**
  * Implements hook_filter_FILTER_tips().
- @see emogrifier_filter_info()
+ * @see emogrifier_filter_info()
  */
 function emogrifier_filter_tips($filter, $format, $long) {
   return t('Stylesheet rules will be converted to inline style attributes.');
