@@ -9,6 +9,10 @@
  * @see http://www.pelagodesign.com/sidecar/emogrifier/
  */
 
+if (!function_exists('url_to_path')) {
+  require_once(dirname(__FILE__) . '/url_to_path.inc');
+}
+
 /**
  * Implements hook_help().
  */
@@ -83,48 +87,60 @@ function emogrifier_process($text, $filter, $format, $langcode, $cache, $cache_i
     );
     return $text;
   }
-  $style = array();
+  $styles = array();
   $urls = array();
-  // Fetch the contents of Drupal-generated linked stylesheets with media="all".
-  if (preg_match_all(
-      '#<link\s*type\s*=\s*(["\'])text/css\1\s+rel\s*=\s*(["\'])stylesheet\2\s+href\s*=\s*(["\'])(.*?)\3\s+media\s*=\s*(["\']?)all\5\s*/>#si',
-      $text, $match)) {
-    $urls = array_merge($urls, $match[4]);
-    $text = str_replace($match[0], '', $text);
+  // Match linked stylesheets.
+  if (preg_match_all('#<link[^>]*>\s*#si', $text, $links)) {
+    foreach ($links[0] as $link) {
+      if ( preg_match('#\s+type\s*=\s*(["\']?)text/css\1#si', $link)
+        && preg_match('#\s+rel\s*=\s*(["\']?)stylesheet\1#si', $link)
+        && preg_match('#\s+media\s*=\s*(["\']?)all\1#si', $link)
+        && preg_match('#\s+href\s*=\s*(["\']?)(.*?)\1#si', $link, $match) ) {
+        $urls = array_merge($urls, array_slice($match, 2, 1));
+      }
+      $text = str_replace($link, '', $text);
+    }
   }
-  // This match is for non-aggregated stylesheets.
-  if (preg_match_all(
-      '#<style\s+type\s*=\s*(["\'])text/css\1\s+media\s*=\s*(["\'])all\2\s*>(.*)</style>#Usi',
-      $text, $match)) {
-    foreach ($match[3] as $imports) {
-      if (preg_match_all(
-          '#@import\s+url\s*\(\s*(["\'])(.*)\1\s*\)\s*;#',
-          $imports, $import)) {
-        $urls = array_merge($urls, $import[2]);
+  // Match style blocks, possibly with @imports.
+  if (
+    preg_match_all(
+      '#(<style[^>]*>)\s*(<!--)?\s*(.*?)\s*(-->)?\s*</style>\s*#si',
+      $text, $blocks
+    )
+  ) {
+    foreach ($blocks[1] as $block => $tag) {
+      if ( preg_match('#\s+type\s*=\s*(["\']?)text/css\1#si', $tag)
+        && preg_match('#\s+media\s*=\s*(["\']?)all\1#si', $tag) ) {
+        if (
+          preg_match_all('#@import\s+url\s*\(\s*(["\']?)(.*)\1\s*\)\s*;#si',
+            $blocks[3][$block], $imports
+          )
+        ) {
+          $urls = array_merge($urls, $imports[2]);
+          $rules = trim(str_replace($imports, '', $blocks[3][$block]));
+          if (!empty($rules)) {
+            $styles[] = $rules;
+          }
+        }
       }
     }
-    $text = str_replace($match[0], '', $text);
+    $text = str_replace($blocks[0], '', $text);
   }
   foreach ($urls as $url) {
-    if ( ($path = drupal_realpath(DRUPAL_ROOT . parse_url($url, PHP_URL_PATH)))
-      && (is_readable($path) && !is_dir($path)) ) {
-      $style[] = file_get_contents($path);
+    if ( ($path = url_to_path(check_url($url)))
+      && (file_exists($path))
+      && ($style = trim(file_get_contents($path)))
+    ) {
+      $styles[] = $style;
     }
   }
-  // Extract the contents of any remaining inline stylesheet rules.
-  if (preg_match_all(
-      '#<style[^>]*>\s*(<!--)?\s*?(.*?)\s*(-->)?\s*</style>#si',
-      $text, $matches)) {
-    $style = array_merge($style, $matches[2]);
-    $text = str_replace($matches[0], '', $text);
-  }
   // Strip comments and unecessary whitespace from the collected style rules.
-  $style = preg_replace(
-    array('/[[:space:]]+/s', '#/\*.*?\*/#', '/ +/'), ' ', $style
+  $styles = preg_replace(
+    array('/[[:space:]]+/s', '#/\*.*?\*/#', '/ +/'), ' ', $styles
   );
   // Emogrify can't handle several CSS rules on one line,
   // so insert a newline character after each closing bracket.
-  $style = preg_replace('/}\s*/', "}\n", implode("\n", $style));
+  $styles = preg_replace('/}\s*/', "}\n", implode("\n", $styles));
   // Strip unwanted container tags.
   $text = preg_replace(
     '#\s*<(applet|audio|canvas|embed|frameset|head|iframe|object|ruby|script|style|title|video)[^[:alnum:]].*?</\1\s*>\s*#si',
@@ -137,9 +153,11 @@ function emogrifier_process($text, $filter, $format, $langcode, $cache, $cache_i
   // Strip unwanted container tags replaced by comments.
   $text = preg_replace('#\s*<!--.*?-->\s*#si', '', $text);
   // Load the html text and style rules.
-  $emogrifier = new Emogrifier('<html><body>' . $text . '</body></html>', $style);
+  $emogrifier = new Emogrifier('<html><body>' . $text . '</body></html>', $styles);
   // Apply the rules to create inline style attributes.
-  $text = @$emogrifier->emogrify();
+  $text = $emogrifier->emogrify();
+  // Extract body portion.
+  $text = preg_replace('#.*<body>(.*)</body>.*#Usi', '\1', $text);
   // Strip unwanted attributes.
   $text = preg_replace(
     array(
