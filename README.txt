@@ -33,5 +33,5 @@ References
    2. http://php.net/dom
    3. http://drupal.org/project/libraries
    4. http://www.pelagodesign.com/sidecar/emogrifier/
-   5. http://drupal.org/node/895232
+   5. http://drupal.org/documentation/install/modules-themes/modules-7
    6. http://drupal.org/project/emogrifier

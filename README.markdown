@@ -28,7 +28,7 @@ support.
 4.  [Download](http://www.pelagodesign.com/sidecar/emogrifier/) the
     emogrifier.php and place it within the library directory you just created.
 
-5.  [Install](http://drupal.org/node/895232)
+5.  [Install](http://drupal.org/documentation/install/modules-themes/modules-7)
     [this module](http://drupal.org/project/emogrifier) and enable it.
 
 6.  Visit <u>admin/configure/content/formats</u> or click on
