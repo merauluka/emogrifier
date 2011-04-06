@@ -42,9 +42,9 @@ function emogrifier_filter_info() {
     'filter_emogrifier' => array(
       'title' => t('Emogrifier'),
       'description' => t('Converts stylesheet rules to inline style attributes.'),
-      'process callback' => 'emogrifier_process',
-      'settings callback' => 'emogrifier_filter_settings',
-      'tips callback' => 'emogrifier_filter_tips',
+      'process callback' => '_emogrifier_process',
+      'settings callback' => '_emogrifier_filter_settings',
+      'tips callback' => '_emogrifier_filter_tips',
     ),
   );
 }
@@ -53,7 +53,7 @@ function emogrifier_filter_info() {
  * Implements hook_filter_FILTER_process().
  @see emogrifier_filter_info()
  */
-function emogrifier_process($text, $filter, $format, $langcode, $cache, $cache_id) {
+function _emogrifier_process($text, $filter, $format, $langcode, $cache, $cache_id) {
   if (empty($text)) {
     return '';
   }
@@ -117,7 +117,7 @@ function emogrifier_process($text, $filter, $format, $langcode, $cache, $cache_i
           )
         ) {
           $urls = array_merge($urls, $imports[2]);
-          $rules = trim(str_replace($imports, '', $blocks[3][$block]));
+          $rules = trim(str_replace($imports[0], '', $blocks[3][$block]));
           if (!empty($rules)) {
             $styles[] = $rules;
           }
@@ -260,7 +260,7 @@ function _emogrifier_available() {
  * Implements hook_filter_FILTER_settings().
  * @see emogrifier_filter_info()
  */
-function emogrifier_filter_settings($form, &$form_state, $filter, $format, $defaults, $filters) {
+function _emogrifier_filter_settings($form, &$form_state, $filter, $format, $defaults, $filters) {
   return array();
 }
 
@@ -268,6 +268,6 @@ function emogrifier_filter_settings($form, &$form_state, $filter, $format, $defa
  * Implements hook_filter_FILTER_tips().
  * @see emogrifier_filter_info()
  */
-function emogrifier_filter_tips($filter, $format, $long) {
+function _emogrifier_filter_tips($filter, $format, $long) {
   return t('Stylesheet rules will be converted to inline style attributes.');
 }
