@@ -127,7 +127,7 @@ function emogrifier_process($text, $filter, $format, $langcode, $cache, $cache_i
     $text = str_replace($blocks[0], '', $text);
   }
   foreach ($urls as $url) {
-    if ( ($path = url_to_path(check_url($url)))
+    if ( ($path = url_to_realpath(check_url($url)))
       && (file_exists($path))
       && ($style = trim(file_get_contents($path)))
     ) {
@@ -155,7 +155,7 @@ function emogrifier_process($text, $filter, $format, $langcode, $cache, $cache_i
   // Load the html text and style rules.
   $emogrifier = new Emogrifier('<html><body>' . $text . '</body></html>', $styles);
   // Apply the rules to create inline style attributes.
-  $text = $emogrifier->emogrify();
+  $text = @$emogrifier->emogrify();
   // Extract body portion.
   $text = preg_replace('#.*<body>(.*)</body>.*#Usi', '\1', $text);
   // Strip unwanted attributes.
@@ -163,12 +163,12 @@ function emogrifier_process($text, $filter, $format, $langcode, $cache, $cache_i
     array(
       '#(<[^>]*?)\s*class\s*=\s*(["\']).*?\2#si',
       '#(<[^>]*?)\s*id\s*=\s*(["\']).*?\2#si',
-    ),'\1', $text);
+    ), '\1', $text);
   // @todo Strip any whitespace outside of <pre> or <code> tags?
   return $text;
 }
 
-function _emogrifier_replace_tag(array $matches){
+function _emogrifier_replace_tag(array $matches) {
   static $allowed;
   if (!isset($allowed)) {
     $allowed = &emogrifier_allowed_tags();
