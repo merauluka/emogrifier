@@ -19,7 +19,7 @@ if (!function_exists('url_to_path')) {
 function emogrifier_help($path = 'admin/help#emogrifier', $arg) {
   switch ($path) {
     case 'admin/help#emogrifier':
-      return '<p>'. t(
+      return '<p>' . t(
         'The <a href="@module">%emogrifier</a> module uses the'
         . ' <a href="@class">%emogrifier</a> class library to convert stylesheet'
         . ' rules to inline style attributes. This ensures proper display on email'
@@ -51,7 +51,7 @@ function emogrifier_filter_info() {
 
 /**
  * Implements hook_filter_FILTER_process().
- @see emogrifier_filter_info()
+ * @see emogrifier_filter_info()
  */
 function _emogrifier_process($text, $filter, $format, $langcode, $cache, $cache_id) {
   if (empty($text)) {
