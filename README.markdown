@@ -1,4 +1,4 @@
-## Emogrifier
+## [Emogrifier](http://drupal.org/project/emogrifier)
 
 This module uses the
 [emogrifier class library](http://www.pelagosdesign.com/sidecar/emogrifier/)
@@ -6,7 +6,7 @@ as an input filter to convert stylesheet rules to inline style attributes. This
 ensures proper display on email and mobile device readers that lack stylesheet
 support.
 
-## Installation
+## [Installation](http://drupal.org/documentation/install/modules-themes/modules-7)
 
 1.  Ensure that the PHP [Document Object Model extension](http://php.net/dom)
     is available. Emogrifier requires the dom extension and will not work
