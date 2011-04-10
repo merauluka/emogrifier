@@ -1,8 +1,8 @@
 [1]Emogrifier
 
-   This module uses the [2]emogrifier class library as an input filter to
-   convert stylesheet rules to inline style attributes. This ensures
-   proper display on email and mobile device readers that lack stylesheet
+   Uses the [2]emogrifier class library as an input filter to convert
+   stylesheet rules to inline style attributes. This ensures proper
+   display on email and mobile device readers that lack stylesheet
    support.
 
 [3]Installation
