@@ -245,14 +245,11 @@ function &emogrifier_allowed_tags() {
  * Returns TRUE if the Emogrifier class is available.
  */
 function _emogrifier_available() {
+  // Maybe something loaded the class without telling libraries API.
   if (class_exists('Emogrifier')) {
     return TRUE;
   }
-  $path = libraries_get_path('emogrifier') . '/emogrifier.php';
-  if (!file_exists($path)) {
-    return FALSE;
-  }
-  include_once $path;
+  @include_once libraries_get_path('emogrifier') . '/emogrifier.php';
   return class_exists('Emogrifier');
 }
 
