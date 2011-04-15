@@ -19,11 +19,12 @@ if (!function_exists('url_to_path')) {
 function emogrifier_help($path = 'admin/help#emogrifier', $arg) {
   switch ($path) {
     case 'admin/help#emogrifier':
-      return '<p>'. t('The <a href="@module">%emogrifier</a> module uses the <a href="@class">%emogrifier</a> class library to convert stylesheet rules to inline style attributes. This ensures proper display on email and mobile device readers that lack stylesheet support.',
+      return '<p>'
+        . t('The <a href="!module">%emogrifier</a> module uses the <a href="!class">%emogrifier</a> class library to convert stylesheet rules to inline style attributes. This ensures proper display on email and mobile device readers that lack stylesheet support.',
         array(
-          '@module' => url('http://drupal.org/project/emogrifier'),
+          '!module' => url('http://drupal.org/project/emogrifier'),
           '%emogrifier' => 'emogrifier',
-          '@class' => url('http://www.pelagodesign.com/sidecar/emogrifier/'),
+          '!class' => url('http://www.pelagodesign.com/sidecar/emogrifier/'),
         )
       ) . '</p>';
       break;
