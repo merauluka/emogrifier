@@ -1,7 +1,7 @@
 ## [Emogrifier](http://drupal.org/project/emogrifier)
 
 Uses the
-[emogrifier class library](http://www.pelagosdesign.com/sidecar/emogrifier/)
+[emogrifier class library](http://www.pelagodesign.com/sidecar/emogrifier/)
 as an input filter to convert stylesheet rules to inline style attributes. This
 ensures proper display on email and mobile device readers that lack stylesheet
 support.

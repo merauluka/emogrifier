@@ -30,7 +30,7 @@
 References
 
    1. http://drupal.org/project/emogrifier
-   2. http://www.pelagosdesign.com/sidecar/emogrifier/
+   2. http://www.pelagodesign.com/sidecar/emogrifier/
    3. http://drupal.org/documentation/install/modules-themes/modules-7
    4. http://php.net/dom
    5. http://drupal.org/project/libraries
