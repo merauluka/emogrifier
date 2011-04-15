@@ -19,11 +19,7 @@ if (!function_exists('url_to_path')) {
 function emogrifier_help($path = 'admin/help#emogrifier', $arg) {
   switch ($path) {
     case 'admin/help#emogrifier':
-      return '<p>' . t(
-        'The <a href="@module">%emogrifier</a> module uses the'
-        . ' <a href="@class">%emogrifier</a> class library to convert stylesheet'
-        . ' rules to inline style attributes. This ensures proper display on email'
-        . ' and mobile device readers that lack stylesheet support.',
+      return '<p>'. t('The <a href="@module">%emogrifier</a> module uses the <a href="@class">%emogrifier</a> class library to convert stylesheet rules to inline style attributes. This ensures proper display on email and mobile device readers that lack stylesheet support.',
         array(
           '@module' => url('http://drupal.org/project/emogrifier'),
           '%emogrifier' => 'emogrifier',
@@ -61,13 +57,12 @@ function _emogrifier_process($text, $filter, $format, $langcode, $cache, $cache_
   if (!extension_loaded('dom')) {
     watchdog(
       'emogrifier',
-      'The PHP <a href="@dom">%dom</a> extension required by '
-      . '<a href="@emogrifier">%emogrifier</a> is not loaded.',
+      'The PHP <a href="!dom">%dom</a> extension required by <a href="!emogrifier">%emogrifier</a> is not loaded.',
       array(
-        '@dom' => url('http://php.net/dom'),
+        '!dom' => url('http://php.net/dom'),
         '%dom' => 'dom',
-        '@emogrifier' => url('http://drupal.org/project/emogrifier'),
-        '%emogrifier' => 'emogrifier',
+        '!emogrifier' => url('http://drupal.org/project/emogrifier'),
+        '%emogrifier' => 'Emogrifier',
       ),
       WATCHDOG_WARNING
     );
@@ -76,12 +71,11 @@ function _emogrifier_process($text, $filter, $format, $langcode, $cache, $cache_
   if (!_emogrifier_available()) {
     watchdog(
       'emogrifier',
-      'The <a href="@library">%emogrifier</a> class library required by the'
-      . ' <a href="@module">%emogrifier</a> module could not be loaded.',
+      'The <a href="!library">%emogrifier</a> class library required by the <a href="!module">%emogrifier</a> module could not be loaded.',
       array(
-        '@library' => url('http://www.pelagodesign.com/sidecar/emogrifier/'),
+        '!library' => url('http://www.pelagodesign.com/sidecar/emogrifier/'),
         '%emogrifier' => 'emogrifier',
-        '@module' => url('http://drupal.org/project/emogrifier'),
+        '!module' => url('http://drupal.org/project/emogrifier'),
       ),
       WATCHDOG_WARNING
     );
@@ -205,7 +199,6 @@ function &emogrifier_allowed_tags() {
         ), 'div'
       ) + array(
         // Other tag replacements.
-        'b' => 'strong',
         'big' => array(
           '<span style="font-size: 120%">', '</span>'
         ),
@@ -215,7 +208,6 @@ function &emogrifier_allowed_tags() {
         'command' => 'button',
         'datalist' => 'select',
         'dir' => 'ul',
-        'i' => 'em',
         'mark' => array(
           '<span style="background-color: yellow; color: black">', '</span>'
         ),
@@ -228,9 +220,6 @@ function &emogrifier_allowed_tags() {
         ),
         'strike' => array(
           '<span style="text-decoration: line-through">', '</span>'
-        ),
-        'u' => array(
-          '<span style="text-decoration: underline">', '</span>'
         ),
         'wbr' => array('&shy;', ''),
         'xmp' => 'pre',
