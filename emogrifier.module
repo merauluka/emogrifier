@@ -90,7 +90,7 @@ function _emogrifier_process($text, $filter, $format, $langcode, $cache, $cache_
       if ( preg_match('#\s+type\s*=\s*(["\']?)text/css\1#si', $link)
         && preg_match('#\s+rel\s*=\s*(["\']?)stylesheet\1#si', $link)
         && preg_match('#\s+media\s*=\s*(["\']?)all\1#si', $link)
-        && preg_match('#\s+href\s*=\s*(["\']?)(.*?)\1#si', $link, $match) ) {
+        && preg_match('#\s+href\s*=\s*(["\']?)([^?]*?)(\?.*?)?\1#si', $link, $match) ) {
         $urls = array_merge($urls, array_slice($match, 2, 1));
       }
       $text = str_replace($link, '', $text);
@@ -107,7 +107,7 @@ function _emogrifier_process($text, $filter, $format, $langcode, $cache, $cache_
       if ( preg_match('#\s+type\s*=\s*(["\']?)text/css\1#si', $tag)
         && preg_match('#\s+media\s*=\s*(["\']?)all\1#si', $tag) ) {
         if (
-          preg_match_all('#@import\s+url\s*\(\s*(["\']?)(.*)\1\s*\)\s*;#si',
+          preg_match_all('#@import\s+url\s*\(\s*(["\']?)([^?]*)(\?.*?)?\1\s*\)\s*;#si',
             $blocks[3][$block], $imports
           )
         ) {
