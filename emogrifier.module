@@ -133,6 +133,8 @@ function _emogrifier_process($text, $filter, $format, $langcode, $cache, $cache_
   $styles = preg_replace(
     array('/[[:space:]]+/s', '#/\*.*?\*/#', '/ +/'), ' ', $styles
   );
+  // Remove quote marks around urls.
+  $styles = preg_replace('/url[[:space:]]*\([[:space:]]*(["\'])(.*?)\1[[:space:]]*\)/mis', 'url(\2)', $styles);
   // Emogrify can't handle several CSS rules on one line,
   // so insert a newline character after each closing bracket.
   $styles = preg_replace('/}\s*/', "}\n", implode("\n", $styles));

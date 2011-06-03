@@ -5,7 +5,7 @@
    display on email and mobile device readers that lack stylesheet
    support.
 
-[3]Installation
+  [3]Installation
 
     1. Ensure that the PHP [4]Document Object Model extension is
        available. Emogrifier requires the dom extension and will not work
