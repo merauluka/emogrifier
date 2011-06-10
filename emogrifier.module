@@ -65,7 +65,7 @@ function _emogrifier_process($text, $filter, $format, $langcode, $cache, $cache_
         '!emogrifier' => url('http://drupal.org/project/emogrifier'),
         '%emogrifier' => 'Emogrifier',
       ),
-      WATCHDOG_WARNING
+      LOG_WARNING
     );
     return $text;
   }
@@ -78,7 +78,7 @@ function _emogrifier_process($text, $filter, $format, $langcode, $cache, $cache_
         '%emogrifier' => 'emogrifier',
         '!module' => url('http://drupal.org/project/emogrifier'),
       ),
-      WATCHDOG_WARNING
+      LOG_WARNING
     );
     return $text;
   }
