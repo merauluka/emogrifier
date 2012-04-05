@@ -141,15 +141,15 @@ function _emogrifier_process($text, $filter, $format, $langcode, $cache, $cache_
   $styles = preg_replace('/}\s*/', "}\n", implode("\n", $styles));
   // Strip unwanted container tags.
   $text = preg_replace(
-    '#\s*<(applet|audio|canvas|embed|frameset|head|iframe|object|ruby|script|style|title|video)[^[:alnum:]].*?</\1\s*>\s*#si',
+    '#<(applet|audio|canvas|embed|frameset|head|iframe|object|ruby|script|style|title|video)[^[:alnum:]].*?</\1\s*>\s*#si',
     '', '<head>' . $text
   );
   // Replace or remove other tags.
   $text = preg_replace_callback(
-    '#\s*(<(/?))([!\[[:alnum:]\]]{2,12})([^>]*>)#s', '_emogrifier_replace_tag', $text
+    '#(<(/?))([!\[[:alnum:]\]]{2,12})([^>]*>)#s', '_emogrifier_replace_tag', $text
   );
   // Strip unwanted container tags replaced by comments.
-  $text = preg_replace('#\s*<!--.*?-->\s*#si', '', $text);
+  $text = preg_replace('#<!--.*?-->\s*#si', '', $text);
   // Load the html text and style rules.
   $emogrifier = new Emogrifier('<html><body>' . $text . '</body></html>', $styles);
   // Apply the rules to create inline style attributes.
