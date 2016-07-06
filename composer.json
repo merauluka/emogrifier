@@ -1,0 +1,9 @@
+{
+  "name": "drupal/emogrifier",
+  "description": "Emogrifier",
+  "type": "drupal-module",
+  "license": "MIT",
+  "require": {
+    "pelago/emogrifier": "@dev"
+  }
+}

@@ -1,0 +1,5 @@
+type: module
+name: 'Emogrifier'
+description: 'CSS inliner (embeds CSS from stylesheets as inline CSS on HTML tags)'
+core: '8.x'
+version: '1.0'
