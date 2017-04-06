@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Hook implementations for emogrifier module
+ * Hook implementations for emogrifier module.
  */
 
 use Pelago\Emogrifier;
@@ -9,7 +9,6 @@ use Drupal\emogrifier\Render\EmogrifierMarkup;
 
 /**
  * Implements hook_mail_alter().
- * @param array $message
  */
 function emogrifier_mail_alter(&$message) {
   // @todo Make the interaction mechanism configurable
@@ -23,26 +22,29 @@ function emogrifier_mail_alter(&$message) {
 }
 
 /**
- * Get current theme CSS
+ * Get current theme CSS.
  */
 function emogrifier_default_theme_css() {
-  // Store statically for improving cron job handling
+  // Store statically for improving cron job handling.
   static $css;
 
   if (!isset($css)) {
     // Fetch CSS from current default theme, if user is using admin theme,
-    // we still want to use default theme
+    // we still want to use default theme.
     $config = \Drupal::config('system.theme');
     $themename = $config->get('default');
     $libraries = \Drupal::service('library.discovery')
       ->getLibrariesByExtension($themename);
     $css_optimizer = \Drupal::service('asset.css.optimizer');
     $css = '';
-    foreach ($libraries as $library) {
-      // @todo support weight of css
-      if (!empty($library['css'])) {
-        foreach ($library['css'] as $cssfile) {
-          // Skip css specific to print or screen
+    // @todo support weight of css
+    // Take globalstyling and mail css only,
+    // not other libraries.
+    $librarytypes = array('globalstyling', 'mail');
+    foreach ($librarytypes as $librarytype) {
+      if (isset($libraries[$librarytype]) && !empty($libraries[$librarytype]['css'])) {
+        foreach ($libraries[$librarytype]['css'] as $cssfile) {
+          // Skip css specific to print or screen.
           if (
             isset($cssfile['media']) &&
             ($cssfile['media'] == 'screen' || $cssfile['media'] == 'print')
@@ -51,7 +53,7 @@ function emogrifier_default_theme_css() {
           }
           // @todo support external CSS as well
           if ($cssfile['type'] == 'file') {
-            $css .= $css_optimizer->loadFile($cssfile['data']) . ' ';
+            $css .= $css_optimizer->loadFile($cssfile['data']) . " \n";
           }
         }
       }
