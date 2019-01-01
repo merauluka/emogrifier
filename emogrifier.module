@@ -11,13 +11,14 @@ use Drupal\emogrifier\Render\EmogrifierMarkup;
  * Implements hook_mail_alter().
  */
 function emogrifier_mail_alter(&$message) {
-  // @todo Make the interaction mechanism configurable
-  if (isset($message['body']['body']) && is_subclass_of($message['body']['body'], '\Drupal\Component\Render\MarkupInterface')) {
+  // @todo make this more flexible.
+  $sub_key = isset($message['body']['body']) ? 'body' : 0;
+  if (isset($message['body'][$sub_key]) && is_subclass_of($message['body'][$sub_key], '\Drupal\Component\Render\MarkupInterface')) {
     $css = emogrifier_default_theme_css();
     $emogrifier = new Emogrifier();
-    $emogrifier->setHtml((string) $message['body']['body']);
+    $emogrifier->setHtml((string) $message['body'][$sub_key]);
     $emogrifier->setCss($css);
-    $message['body']['body'] = EmogrifierMarkup::create($emogrifier->emogrifyBodyContent());
+    $message['body'][$sub_key] = EmogrifierMarkup::create($emogrifier->emogrifyBodyContent());
   }
 }
 
