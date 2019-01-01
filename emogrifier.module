@@ -61,5 +61,9 @@ function emogrifier_default_theme_css() {
     }
   }
 
+  // Get rid of attribute and :after selectors as they cannot be processed properly with
+  // the Emogrifier
+  $css = preg_replace(['/\[.*\]/', '/[^}]*a:after {[^}]*}/s'], '', $css);
+
   return $css;
 }
