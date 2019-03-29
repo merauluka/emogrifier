@@ -12,13 +12,17 @@ use Drupal\emogrifier\Render\EmogrifierMarkup;
  */
 function emogrifier_mail_alter(&$message) {
   // @todo make this more flexible.
-  $sub_key = isset($message['body']['body']) ? 'body' : 0;
-  if (isset($message['body'][$sub_key]) && is_subclass_of($message['body'][$sub_key], '\Drupal\Component\Render\MarkupInterface')) {
+  if (isset($message['body'])) {
+    if (!is_array($message['body'])) {
+      $message['body'][0] = $message['body'];
+    }
     $css = emogrifier_default_theme_css();
     $emogrifier = new Emogrifier();
-    $emogrifier->setHtml((string) $message['body'][$sub_key]);
     $emogrifier->setCss($css);
-    $message['body'][$sub_key] = EmogrifierMarkup::create($emogrifier->emogrifyBodyContent());
+    foreach ($message['body'] as $key => $body) {
+      $emogrifier->setHtml((string) $body);
+      $message['body'][$key] = EmogrifierMarkup::create($emogrifier->emogrifyBodyContent());
+    }
   }
 }
 
@@ -41,7 +45,7 @@ function emogrifier_default_theme_css() {
     // @todo support weight of css
     // Take globalstyling and mail css only,
     // not other libraries.
-    $librarytypes = array('globalstyling', 'mail');
+    $librarytypes = ['globalstyling', 'mail'];
     foreach ($librarytypes as $librarytype) {
       if (isset($libraries[$librarytype]) && !empty($libraries[$librarytype]['css'])) {
         foreach ($libraries[$librarytype]['css'] as $cssfile) {
